@@ -137,7 +137,7 @@
 
   <!-- Dark Mode Toggle -->
   <div class="fixed top-4 right-4 z-50">
-    <button id="darkModeToggle" class="bg-gray-800 text-white p-2 rounded-full hover:bg-gray-700 transition-colors">🌙</button>
+    <button id="darkModeToggle" class="bg-gray-800 text-white p-2 rounded-full hover:bg-gray-700 transition-colors">☀</button>
   </div>
 
   <!-- Feedback Widget -->
@@ -214,11 +214,9 @@
 
   <!-- Photography Section -->
   <section id="photography" class="py-20 px-4 fade-in" data-parallax-speed="0.05">
-    <!-- Outer Container: partial transparency, neutral background in light mode, darker in dark mode -->
     <div class="max-w-4xl mx-auto rounded-lg p-8 shadow-lg text-black dark:text-white bg-white/70 dark:bg-black/50 backdrop-blur-md">
       <h2 class="text-3xl font-bold mb-6 text-center">KPFotografy - Photography</h2>
       <p class="text-center mb-8">A showcase of my photography works.</p>
-      <!-- Inner boxes: also partial transparency but a bit less, so no bluish tint -->
       <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
         <img src="img/pic1.jpg" alt="Photo 1" class="mx-auto bg-gray-50/90 dark:bg-gray-800/90 rounded-lg shadow-md h-48 object-cover cursor-pointer lightbox-img" loading="lazy">
         <img src="img/pic2.jpg" alt="Photo 2" class="mx-auto bg-gray-50/90 dark:bg-gray-800/90 rounded-lg shadow-md h-48 object-cover cursor-pointer lightbox-img" loading="lazy">
@@ -265,10 +263,11 @@
 
   <!-- Contact Section -->
   <section id="contact" class="py-20 px-4 fade-in" data-parallax-speed="0.05">
+    <!-- Added id="contactForm" -->
     <div class="max-w-4xl mx-auto rounded-lg p-8 shadow-lg text-black dark:text-white bg-white/70 dark:bg-black/50 backdrop-blur-md">
       <h2 class="text-3xl font-bold mb-6 text-center">Contact</h2>
       <p class="text-center mb-8">Get in touch with me for inquiries or collaborations.</p>
-      <form class="space-y-4 max-w-xl mx-auto">
+      <form id="contactForm" class="space-y-4 max-w-xl mx-auto">
         <div>
           <label for="name" class="block mb-1">Name</label>
           <input type="text" id="name" class="w-full p-3 rounded border bg-gray-50/90 dark:bg-gray-800/90 text-black dark:text-white" placeholder="Your Name">
@@ -301,9 +300,10 @@
   <!-- Feedback Modal -->
   <div id="feedback-modal" class="modal">
     <div class="bg-gray-800 p-6 rounded-lg relative w-11/12 sm:w-1/2">
+      <!-- Added id="feedbackForm" -->
       <button id="feedbackClose" class="absolute top-2 right-2 text-white text-xl">&times;</button>
       <h2 class="text-2xl mb-4">Feedback</h2>
-      <form class="space-y-4">
+      <form id="feedbackForm" class="space-y-4">
         <div>
           <label for="feedbackName" class="block mb-1">Name</label>
           <input type="text" id="feedbackName" class="w-full p-3 rounded border bg-gray-700 text-white" placeholder="Your Name">
@@ -312,7 +312,9 @@
           <label for="feedbackMessage" class="block mb-1">Feedback</label>
           <textarea id="feedbackMessage" rows="4" class="w-full p-3 rounded border bg-gray-700 text-white" placeholder="Your feedback"></textarea>
         </div>
-        <button type="submit" class="w-full bg-blue-500 dark:bg-blue-600 text-white p-3 rounded hover:bg-blue-600 dark:hover:bg-blue-700 transition-colors">Submit</button>
+        <button type="submit" class="w-full bg-blue-500 dark:bg-blue-600 text-white p-3 rounded hover:bg-blue-600 dark:hover:bg-blue-700 transition-colors">
+          Submit
+        </button>
       </form>
     </div>
   </div>
@@ -366,7 +368,7 @@
       });
     });
 
-    // Global Floating Code Snippets
+    // Global Floating Code Snippets with improved distribution using a 20x20 grid (5% increments)
     const globalCodesContainer = document.getElementById("global-codes");
     const snippetTexts = [
       "&lt;div&gt;Hello World&lt;/div&gt;",
@@ -418,7 +420,79 @@
       });
     }, 30000);
 
-    // Feedback Modal
+    // --- Step 2: Integrate Contact & Feedback Form Submission using Cloudflare Worker & SendGrid ---
+    // Replace this URL with your actual Cloudflare Worker endpoint URL.
+    const workerEndpoint = "https://sendemail.khush23.workers.dev";
+
+    // Contact Form Submission
+    const contactForm = document.getElementById("contactForm");
+    if (contactForm) {
+      contactForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const name = document.getElementById("name").value.trim();
+        const email = document.getElementById("email").value.trim();
+        const message = document.getElementById("message").value.trim();
+        if (!name || !email || !message) {
+          alert("Please fill out all fields.");
+          return;
+        }
+        try {
+          const res = await fetch(workerEndpoint, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ name, email, message })
+          });
+          if (!res.ok) {
+            const errText = await res.text();
+            alert("Error sending message: " + errText);
+            return;
+          }
+          alert("Message sent! Thank you.");
+          contactForm.reset();
+        } catch (err) {
+          console.error(err);
+          alert("An error occurred. Please try again later.");
+        }
+      });
+    }
+
+    // Feedback Form Submission
+    const feedbackForm = document.getElementById("feedbackForm");
+    if (feedbackForm) {
+      feedbackForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const name = document.getElementById("feedbackName").value.trim();
+        const message = document.getElementById("feedbackMessage").value.trim();
+        if (!name || !message) {
+          alert("Please fill out all fields.");
+          return;
+        }
+        try {
+          const res = await fetch(workerEndpoint, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json"
+            },
+            // Here we send feedback data. You could add a type field if needed.
+            body: JSON.stringify({ name, email: "N/A", message: "Feedback: " + message })
+          });
+          if (!res.ok) {
+            const errText = await res.text();
+            alert("Error sending feedback: " + errText);
+            return;
+          }
+          alert("Feedback sent! Thank you.");
+          feedbackForm.reset();
+        } catch (err) {
+          console.error(err);
+          alert("An error occurred. Please try again later.");
+        }
+      });
+    }
+
+    // Feedback Modal Toggle (existing code)
     const feedbackBtn = document.getElementById("feedbackBtn");
     const feedbackModal = document.getElementById("feedback-modal");
     const feedbackClose = document.getElementById("feedbackClose");
