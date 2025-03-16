@@ -217,16 +217,12 @@
     <div class="max-w-4xl mx-auto rounded-lg p-8 shadow-lg text-black dark:text-white bg-white/70 dark:bg-black/50 backdrop-blur-md">
       <h2 class="text-3xl font-bold mb-6 text-center">KPFotografy - Photography</h2>
       <p class="text-center mb-8">A showcase of my photography works.</p>
-      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-        <img src="img/pic1.jpg" alt="Photo 1" class="mx-auto bg-gray-50/90 dark:bg-gray-800/90 rounded-lg shadow-md h-48 object-cover cursor-pointer lightbox-img" loading="lazy">
-        <img src="img/pic2.jpg" alt="Photo 2" class="mx-auto bg-gray-50/90 dark:bg-gray-800/90 rounded-lg shadow-md h-48 object-cover cursor-pointer lightbox-img" loading="lazy">
-        <img src="img/pic3.jpg" alt="Photo 3" class="mx-auto bg-gray-50/90 dark:bg-gray-800/90 rounded-lg shadow-md h-48 object-cover cursor-pointer lightbox-img" loading="lazy">
-        <img src="img/pic4.jpg" alt="Photo 4" class="mx-auto bg-gray-50/90 dark:bg-gray-800/90 rounded-lg shadow-md h-48 object-cover cursor-pointer lightbox-img" loading="lazy">
-        <img src="img/pic5.jpg" alt="Photo 5" class="mx-auto bg-gray-50/90 dark:bg-gray-800/90 rounded-lg shadow-md h-48 object-cover cursor-pointer lightbox-img" loading="lazy">
-        <img src="img/pic6.jpg" alt="Photo 6" class="mx-auto bg-gray-50/90 dark:bg-gray-800/90 rounded-lg shadow-md h-48 object-cover cursor-pointer lightbox-img" loading="lazy">
+      <div class="photography-grid grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+        <!-- Dynamic event tiles will be injected here -->
       </div>
     </div>
   </section>
+
 
   <!-- Projects Section -->
   <section id="projects" class="py-20 px-4 fade-in" data-parallax-speed="0.05">
@@ -501,6 +497,47 @@
     feedbackModal.addEventListener("click", (e) => {
       if (e.target === feedbackModal) { feedbackModal.style.display = "none"; }
     });
+
+
+    // Replace with your actual Cloudflare Worker endpoint URL.
+    const eventsEndpoint = 'https://gd.khush23.workers.dev';
+
+    async function loadEvents() {
+      try {
+        const res = await fetch(eventsEndpoint);
+        const events = await res.json();
+        const container = document.querySelector('.photography-grid');
+
+        events.forEach(eventItem => {
+          // Create a tile element for each event
+          const tile = document.createElement('div');
+          tile.className = "tile cursor-pointer rounded-lg shadow-md overflow-hidden";
+
+          // Create the image element for the cover photo
+          const img = document.createElement('img');
+          img.src = eventItem.coverPhotoUrl || 'placeholder.jpg'; // fallback if no image
+          img.alt = eventItem.title;
+          img.className = "h-48 w-full object-cover";
+
+          // Create a caption element for the event title
+          const caption = document.createElement('h3');
+          caption.textContent = eventItem.title;
+          caption.className = "p-4 text-center text-lg font-bold";
+
+          // Append image and caption to the tile
+          tile.appendChild(img);
+          tile.appendChild(caption);
+
+          // Append the tile to the container
+          container.appendChild(tile);
+        });
+      } catch (error) {
+        console.error('Error loading events:', error);
+      }
+    }
+
+    // Load events once the document is ready
+    document.addEventListener('DOMContentLoaded', loadEvents);
   </script>
 </body>
 </html>
