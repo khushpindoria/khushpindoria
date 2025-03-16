@@ -507,6 +507,8 @@
         const res = await fetch(eventsEndpoint);
         const events = await res.json();
         const container = document.querySelector('.photography-grid');
+        // Clear container in case there is cached content
+        container.innerHTML = "";
 
         events.forEach(eventItem => {
           // Create a tile element for each event
