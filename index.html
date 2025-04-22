@@ -501,44 +501,72 @@
 
     // Replace with your actual Cloudflare Worker endpoint URL.
     const eventsEndpoint = 'https://gd.khush23.workers.dev';
-
+    let allEvents = [];        // will hold your full array
+    let renderedCount = 0;     // how many tiles we've injected so far
+    const BATCH_SIZE = 6;      // how many to show at once
+  
     async function loadEvents() {
       try {
-        const res = await fetch(eventsEndpoint);
-        const events = await res.json();
-        const container = document.querySelector('.photography-grid');
-        // Clear container in case there is cached content
-        container.innerHTML = "";
-
-        events.forEach(eventItem => {
-          // Create a tile element for each event
-          const tile = document.createElement('div');
-          tile.className = "tile cursor-pointer rounded-lg shadow-md overflow-hidden";
-
-          // Create the image element for the cover photo
-          const img = document.createElement('img');
-          img.src = eventItem.coverPhotoUrl || 'placeholder.jpg'; // fallback if no image
-          img.alt = eventItem.title;
-          img.className = "h-48 w-full object-cover";
-
-          // Create a caption element for the event title
-          const caption = document.createElement('h3');
-          caption.textContent = eventItem.title;
-          caption.className = "p-4 text-center text-lg font-bold";
-
-          // Append image and caption to the tile
-          tile.appendChild(img);
-          tile.appendChild(caption);
-
-          // Append the tile to the container
-          container.appendChild(tile);
-        });
+        const res  = await fetch(eventsEndpoint);
+        allEvents   = await res.json();
+        renderedCount = 0;
+        renderNextBatch();
+  
+        // if there's more to show, insert the View More button
+        if (allEvents.length > BATCH_SIZE) {
+          addViewMoreButton();
+        }
       } catch (error) {
         console.error('Error loading events:', error);
       }
     }
-
-    // Load events once the document is ready
+  
+    function renderNextBatch() {
+      const container = document.querySelector('.photography-grid');
+      // take the next slice
+      const slice = allEvents.slice(renderedCount, renderedCount + BATCH_SIZE);
+  
+      slice.forEach(eventItem => {
+        const tile = document.createElement('div');
+        tile.className = "tile cursor-pointer rounded-lg shadow-md overflow-hidden";
+  
+        // you can add a tiny spinner or skeleton class here before image loads
+        const img = document.createElement('img');
+        img.loading = 'lazy'; // native lazy‐load
+        img.src     = eventItem.coverPhotoUrl || 'placeholder.jpg';
+        img.alt     = eventItem.title;
+        img.className = "h-48 w-full object-cover";
+  
+        const caption = document.createElement('h3');
+        caption.textContent = eventItem.title;
+        caption.className = "p-4 text-center text-lg font-bold";
+  
+        tile.append(img, caption);
+        container.appendChild(tile);
+      });
+  
+      renderedCount += slice.length;
+    }
+  
+    function addViewMoreButton() {
+      // avoid dupes
+      if (document.getElementById('viewMoreBtn')) return;
+  
+      const btn = document.createElement('button');
+      btn.id = 'viewMoreBtn';
+      btn.textContent = 'View More';
+      btn.className = 'mt-6 px-6 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition';
+      btn.addEventListener('click', () => {
+        renderNextBatch();
+        // if we've rendered all, remove the button
+        if (renderedCount >= allEvents.length) {
+          btn.remove();
+        }
+      });
+  
+      document.querySelector('#photography .max-w-4xl').appendChild(btn);
+    }
+  
     document.addEventListener('DOMContentLoaded', loadEvents);
   </script>
 </body>
