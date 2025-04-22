@@ -549,23 +549,28 @@
     }
   
     function addViewMoreButton() {
-      // avoid dupes
-      if (document.getElementById('viewMoreBtn')) return;
+    if (document.getElementById('viewMoreBtn')) return;
   
-      const btn = document.createElement('button');
-      btn.id = 'viewMoreBtn';
-      btn.textContent = 'View More';
-      btn.className = 'mt-6 px-6 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition';
-      btn.addEventListener('click', () => {
-        renderNextBatch();
-        // if we've rendered all, remove the button
-        if (renderedCount >= allEvents.length) {
-          btn.remove();
-        }
-      });
+    // wrap in a flex container
+    const wrapper = document.createElement('div');
+    wrapper.className = 'flex justify-center mt-6';
   
-      document.querySelector('#photography .max-w-4xl').appendChild(btn);
+    const btn = document.createElement('button');
+    btn.id = 'viewMoreBtn';
+    btn.textContent = 'View More';
+    btn.className = 'px-6 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition';
+  
+    wrapper.appendChild(btn);
+    document.querySelector('#photography .max-w-4xl').appendChild(wrapper);
+  
+    btn.addEventListener('click', () => {
+      renderNextBatch();
+      if (renderedCount >= allEvents.length) {
+        wrapper.remove();
+      }
+    });
     }
+
   
     document.addEventListener('DOMContentLoaded', loadEvents);
   </script>
