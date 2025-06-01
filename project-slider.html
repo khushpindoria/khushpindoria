@@ -1,0 +1,45 @@
+<!-- ===================================================================== -->
+<!-- File: project-slider.html ------------------------------------------ -->
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Before/After Slider | Khush Pindoria</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet" />
+  <style>
+    :root{--bg-color:#FAFAFA;--card-bg:#FFFFFF;--text-color:#1A1A1A;--accent-color:#1565C0;}
+    .dark{--bg-color:#0A0A0A;--card-bg:#212121;--text-color:#F5F5F5;--accent-color:#64B5F6;}
+    body{background:var(--bg-color);color:var(--text-color);font-family:'Roboto',sans-serif;}
+    .clip-img{clip-path:inset(0 100% 0 0);} /* starting 50‑50 split */
+  </style>
+</head>
+<body>
+  <div class="fixed top-4 right-4 z-50">
+    <button id="darkModeToggle" class="btn bg-gradient-to-r from-blue-600 to-blue-700 dark:bg-blue-800 text-white p-2 rounded-full shadow-md">☀</button>
+  </div>
+
+  <main class="min-h-screen flex flex-col items-center justify-center px-4">
+    <h1 class="text-3xl md:text-5xl font-bold mb-6">Before/After Slider</h1>
+    <p class="text-secondary text-center mb-8">Drag the slider to reveal the refactored code sample.</p>
+
+    <div class="relative overflow-hidden max-w-2xl w-full card">
+      <img src="img/project-silder-before.png" alt="Before" class="w-full h-auto select-none">
+      <img id="afterImg" src="img/project-silder-after.png" alt="After" class="w-full h-auto absolute top-0 left-0 clip-img pointer-events-none select-none">
+      <input id="slider" type="range" min="0" max="100" value="0" class="absolute bottom-4 left-1/2 -translate-x-1/2 w-3/4">
+    </div>
+
+    <a href="index.html" class="mt-10 btn bg-gradient-to-r from-blue-600 to-blue-700 text-white px-4 py-2 rounded-lg">← Back to site</a>
+  </main>
+
+  <script>
+    const dm=document.getElementById('darkModeToggle');
+    dm.addEventListener('click',()=>{document.documentElement.classList.toggle('dark');dm.textContent=document.documentElement.classList.contains('dark')?'☀':'🌙';});
+
+    const slider=document.getElementById('slider');
+    const after=document.getElementById('afterImg');
+    slider.addEventListener('input',()=>{after.style.clipPath=`inset(0 ${100-slider.value}% 0 0)`;});
+  </script>
+</body>
+</html>

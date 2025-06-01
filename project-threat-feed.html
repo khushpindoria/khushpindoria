@@ -1,0 +1,130 @@
+<!-- ===================================================================== -->
+<!-- File: project-threat-feed.html  (VERTICAL VERSION) ------------------ -->
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Live Threat Feed | Khush Pindoria</title>
+
+  <!-- Tailwind + font -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet" />
+
+  <style>
+    :root{--bg:#FAFAFA;--card:#FFFFFF;--text:#1A1A1A;--accent:#1565C0;--secondary:#616161;}
+    .dark{--bg:#0A0A0A;--card:#212121;--text:#F5F5F5;--accent:#64B5F6;--secondary:#B0BEC5;}
+
+    body{background:var(--bg);color:var(--text);font-family:'Roboto',sans-serif;transition:background-color .3s,color .3s;}
+
+    /* ---------- vertical ticker ---------- */
+    #tickerBox{position:relative;height:30rem;overflow:hidden;border:1px solid var(--accent);}
+    #tickerInner{position:absolute;top:0;left:0;width:100%;display:flex;flex-direction:column;
+                 animation:scrollY 25s linear infinite;}
+    @keyframes scrollY{
+      0%  {transform:translateY(0);}
+      100%{transform:translateY(-50%);} /* because we duplicate the list */
+    }
+  </style>
+</head>
+<body>
+  <!-- Dark-mode toggle -->
+  <div class="fixed top-4 right-4 z-50">
+    <button id="darkModeToggle"
+            class="btn bg-gradient-to-r from-blue-600 to-blue-700 dark:bg-blue-800 text-white p-2 rounded-full shadow-md">☀</button>
+  </div>
+
+  <main class="min-h-screen flex flex-col items-center justify-center px-4 space-y-6">
+    <h1 class="text-3xl md:text-5xl font-bold">Live Threat Feed</h1>
+    <p class="text-secondary text-center">Latest CVE & IOC headlines – auto-updated.</p>
+
+    <!-- ▶ VERTICAL TICKER CARD ◀ -->
+    <div id="tickerBox"
+         class="w-full max-w-3xl rounded-lg bg-gradient-to-b from-blue-600/10 to-blue-700/10
+                dark:from-blue-800/20 dark:to-blue-900/20 shadow-md backdrop-blur">
+      <div id="tickerInner"></div>
+    </div>
+
+    <a href="index.html"
+       class="btn bg-gradient-to-r from-blue-600 to-blue-700 text-white px-4 py-2 rounded-lg shadow">← Back to site</a>
+  </main>
+
+  <script type="module">
+    /* ---------- dark-mode switcher ---------- */
+    const toggleBtn = document.getElementById('darkModeToggle');
+    toggleBtn.addEventListener('click', () => {
+      document.documentElement.classList.toggle('dark');
+      toggleBtn.textContent = document.documentElement.classList.contains('dark') ? '☀' : '🌙';
+    });
+
+    /* ---------- RSS CONFIG ---------- */
+    const FEEDS = [
+      "https://www.wiz.io/api/feed/cloud-threat-landscape/rss.xml",
+      "https://feeds.feedburner.com/TheHackersNews",
+      "https://www.bleepingcomputer.com/feed/"
+    ];
+
+    /* ---------- proxy helper ---------- */
+
+    // Option B — your own Cloudflare Worker (after you deploy it, comment A and uncomment B)
+     const proxify = url =>
+       `https://threatintelfeed.khush23.workers.dev/?url=${encodeURIComponent(url)}`;
+
+    /* ---------- fetch + render ---------- */
+    async function getItems() {
+      const parser   = new DOMParser();
+      const allItems = [];
+
+      await Promise.all(
+        FEEDS.map(async feed => {
+          try {
+            const xmlText = await fetch(proxify(feed)).then(r => r.text());
+            const xml     = parser.parseFromString(xmlText, "text/xml");
+            const items   = [...xml.querySelectorAll("item")].slice(0, 15);
+
+            items.forEach(it =>
+              allItems.push({
+                title : it.querySelector("title")?.textContent.trim(),
+                link  : it.querySelector("link")?.textContent.trim(),
+                date  : new Date(it.querySelector("pubDate")?.textContent),
+                src   : new URL(feed).hostname.replace(/^www\\./,'')
+              })
+            );
+          } catch (e) { console.error("Feed error:", feed, e); }
+        })
+      );
+
+      /* dedupe + newest first */
+      const uniq = {};
+      allItems.forEach(i => (uniq[i.title] = i));
+      return Object.values(uniq)
+                   .sort((a,b) => b.date - a.date)
+                   .slice(0, 50);
+    }
+
+    async function renderTicker() {
+      const items = await getItems();
+      const inner = document.getElementById("tickerInner");
+
+      /* Build one column, then duplicate it so animation can loop smoothly */
+      const column = items.map(i =>
+        `<div class="py-2 px-4 hover:bg-blue-600/20">
+           <a href="${i.link}" target="_blank" class="hover:underline">
+             [${i.src}] ${i.title}
+           </a>
+         </div>`
+      ).join('');
+
+      inner.innerHTML = column + column;   // duplicate  →  200% height
+
+      /* restart keyframe on each refresh */
+      inner.style.animation = "none";
+      void inner.offsetWidth;
+      inner.style.animation = "";
+    }
+
+    renderTicker();
+    setInterval(renderTicker, 5 * 60_000); // refresh every 5 min
+  </script>
+</body>
+</html>
