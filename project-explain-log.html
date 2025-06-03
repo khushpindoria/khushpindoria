@@ -107,7 +107,7 @@
       const out = document.getElementById('output');
       if(!log){ alert("Please paste a log line first."); return; }
 
-      out.textContent = ""; out.classList.add("type-here");    // reset + cursor
+      out.textContent = "⏳ Working…";
       const pw = await getPassword();
 
       try{
@@ -120,16 +120,11 @@
         if(res.status===429) throw new Error("Rate limit hit — try later");
         if(!res.ok) throw new Error(`Error: ${res.status}`);
 
-        const reader = res.body.getReader();
-        const dec = new TextDecoder();
-        while(true){
-          const {value,done} = await reader.read();
-          if(done) break;
-          out.textContent += dec.decode(value,{stream:true});
-          out.scrollTop = out.scrollHeight;
-        }
-      }catch(err){ alert(err.message); }
-      out.classList.remove("type-here");
+        const answer = await res.text();       // Worker returns plain text
+        out.textContent = answer;
+        out.scrollTop  = out.scrollHeight;
+      }catch(err){ alert(err.message); 
+        out.textContent = "";}
     });
   </script>
 </body>
