@@ -221,6 +221,8 @@
       <nav class="flex flex-wrap justify-center space-x-4 text-lg mb-4">
         <a href="#photography" class="hover:text-secondary-accent transition-colors">Photography</a>
         <span>|</span>
+        <a href="#dj" class="hover:text-secondary-accent transition-colors">DJ Mixes</a>
+        <span>|</span>
         <a href="#projects" class="hover:text-secondary-accent transition-colors">Projects</a>
         <span>|</span>
         <a href="#about" class="hover:text-secondary-accent transition-colors">About</a>
@@ -265,6 +267,15 @@
       <div class="photography-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         <!-- Dynamic event tiles will be injected here -->
       </div>
+    </div>
+  </section>
+
+  <!-- DJ Mixes Section -->
+  <section id="dj" class="py-16 px-4 fade-in">
+    <div class="max-w-5xl mx-auto">
+      <h2 class="text-3xl font-bold text-center mb-8">DJ Mixes</h2>
+      <p class="text-center text-secondary mb-12">Listen to my latest sets.</p>
+      <div id="mixList" class="space-y-8"></div>
     </div>
   </section>
 
@@ -589,7 +600,53 @@ If you’re interested in discussing innovative approaches to cybersecurity, tra
       }, 500);
     });
 
-    document.addEventListener('DOMContentLoaded', loadEvents);
+    // DJ Mixes array (replace FILE_IDs with actual IDs)
+    const mixes = [
+      { title: "Sunset Mix 01", src: "https://docs.google.com/uc?export=open&id=FILE_ID_1" },
+      { title: "Deep Tech 02",  src: "https://docs.google.com/uc?export=open&id=FILE_ID_2" }
+    ];
+
+    function renderMixes() {
+      const list = document.getElementById('mixList');
+      mixes.forEach((mix, i) => {
+        const card = document.createElement('div');
+        card.className = "card p-6";
+        card.innerHTML = `
+          <h3 class="text-xl font-medium mb-4">${mix.title}</h3>
+          <audio id="audio-${i}" src="${mix.src}" preload="none"></audio>
+          <div class="flex items-center gap-4">
+            <button id="play-${i}" class="btn bg-gradient-to-r from-blue-600 to-blue-700 text-white p-2 rounded-full">▶</button>
+            <input id="seek-${i}" type="range" min="0" value="0" class="flex-1 accent-[var(--accent-color)]">
+            <span id="time-${i}" class="w-14 text-right text-sm">0:00</span>
+          </div>`;
+        list.appendChild(card);
+
+        const audio = card.querySelector(`#audio-${i}`);
+        const playBtn = card.querySelector(`#play-${i}`);
+        const seekBar = card.querySelector(`#seek-${i}`);
+        const timeEl = card.querySelector(`#time-${i}`);
+
+        playBtn.addEventListener('click', () => {
+          audio.paused ? audio.play() : audio.pause();
+        });
+        audio.addEventListener('play', () => playBtn.textContent = '⏸');
+        audio.addEventListener('pause', () => playBtn.textContent = '▶');
+        audio.addEventListener('timeupdate', () => {
+          seekBar.max = audio.duration || 0;
+          seekBar.value = audio.currentTime;
+          const m = Math.floor(audio.currentTime / 60);
+          const s = String(Math.floor(audio.currentTime % 60)).padStart(2, '0');
+          timeEl.textContent = `${m}:${s}`;
+        });
+        seekBar.addEventListener('input', () => audio.currentTime = seekBar.value);
+      });
+    }
+
+    // DOMContentLoaded
+    document.addEventListener('DOMContentLoaded', () => {
+      loadEvents();
+      renderMixes();
+    });
   </script>
 </body>
 </html>
