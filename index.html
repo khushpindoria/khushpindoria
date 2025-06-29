@@ -270,12 +270,19 @@
     </div>
   </section>
 
-  <!-- DJ MIXES SECTION (NEW & DYNAMIC) -->
+  <!-- DJ Mixes Section -->
   <section id="dj" class="py-16 px-4 fade-in">
     <div class="max-w-5xl mx-auto">
       <h2 class="text-3xl font-bold text-center mb-8">DJ Mixes</h2>
-      <p class="text-center text-secondary mb-12">Stream my latest DJ sets straight from the decks.</p>
-      <div id="playlist" class="space-y-10"></div>
+      <p class="text-center text-secondary mb-12">Drop in, press play 🔊</p>
+
+      <!-- Grid playlist -->
+      <div id="playlist" class="grid grid-cols-1 sm:grid-cols-2 gap-8"></div>
+
+      <!-- View‑More wrapper -->
+      <div id="mixViewMore" class="flex justify-center mt-8 hidden">
+        <button id="mixMoreBtn" class="btn px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:from-blue-700 hover:to-blue-800">View More</button>
+      </div>
     </div>
   </section>
 
@@ -600,64 +607,78 @@ If you’re interested in discussing innovative approaches to cybersecurity, tra
       }, 500);
     });
 
-    // ——————————— MIXES CONFIG ———————————
-    const mixesEndpoint = 'https://gdmixes.khush23.workers.dev'; // ← your new Worker URL
+    /* ------- DJ MIXES ------- */
+    const mixEndpoint   = 'https://gdmixes.khush23.workers.dev/api/mixes';
+    const BATCH_SIZE    = 2;              // two cards per click
+    let djMixes         = [];
+    let renderedMixes   = 0;
 
-    // 1️⃣  Load DJ mixes dynamically
     async function loadMixes() {
       try {
-        const res   = await fetch(mixesEndpoint);
-        if (!res.ok) throw new Error(await res.text());
-        const mixes = await res.json();
-
-        const root  = document.getElementById('playlist');
-        mixes.forEach((m, i) => {
-          root.insertAdjacentHTML('beforeend', `
-            <div class="card p-6 rounded-2xl shadow-xl bg-[var(--card-bg)]">
-              <h3 class="text-xl font-semibold mb-4">${m.name}</h3>
-              <audio id="mix-${i}" src="${m.src}"></audio>
-              <div class="flex items-center gap-4">
-                <button data-i="${i}" class="play p-3 rounded-full bg-[var(--accent-color)] text-white">▶</button>
-                <input type="range" min="0" value="0" data-i="${i}" class="seek flex-1 accent-[var(--accent-color)]">
-                <span class="time w-14 text-right text-sm">0:00</span>
-              </div>
-            </div>`);
-        });
-
-        // wire controls
-        root.addEventListener('click', e => {
-          if (!e.target.classList.contains('play')) return;
-          const i     = e.target.dataset.i;
-          const audio = document.getElementById(`mix-${i}`);
-          audio.paused ? audio.play() : audio.pause();
-        });
-
-        root.querySelectorAll('audio').forEach((audio, i) => {
-          const card = root.children[i];
-          const btn  = card.querySelector('.play');
-          const seek = card.querySelector('.seek');
-          const time = card.querySelector('.time');
-
-          audio.ontimeupdate = () => {
-            seek.max   = audio.duration || 0;
-            seek.value = audio.currentTime;
-            const m = Math.floor(audio.currentTime / 60);
-            const s = String(Math.floor(audio.currentTime % 60)).padStart(2, '0');
-            time.textContent = `${m}:${s}`;
-          };
-          seek.oninput = () => (audio.currentTime = seek.value);
-          audio.onplay  = () => btn.textContent = '⏸';
-          audio.onpause = () => btn.textContent = '▶';
-        });
+        const res   = await fetch(mixEndpoint);
+        djMixes     = await res.json();
+        renderNextMixes();
+        if (djMixes.length > BATCH_SIZE) document.getElementById('mixViewMore').classList.remove('hidden');
       } catch (err) {
         console.error('Error loading mixes:', err);
       }
     }
 
+    function renderNextMixes() {
+      const root = document.getElementById('playlist');
+      const slice = djMixes.slice(renderedMixes, renderedMixes + BATCH_SIZE);
+
+      slice.forEach((m, i) => {
+        const idx = renderedMixes + i;              // global index for controls
+        root.insertAdjacentHTML('beforeend', `
+          <div class="card p-6 bg-[var(--card-bg)] rounded-2xl shadow-xl flex flex-col gap-4">
+            <h3 class="text-xl font-semibold">${m.name}</h3>
+            <audio id="mix-${idx}" src="${m.src}"></audio>
+            <div class="flex items-center gap-4">
+              <button data-i="${idx}" class="play p-3 rounded-full bg-[var(--accent-color)] text-white">▶</button>
+              <input type="range" min="0" value="0" data-i="${idx}" class="seek flex-1 accent-[var(--accent-color)]">
+              <span class="time w-14 text-right text-sm">0:00</span>
+            </div>
+          </div>`);
+      });
+
+      // Wire freshly added controls
+      slice.forEach((_, local) => {
+        const gIdx  = renderedMixes + local;
+        const card  = document.getElementById(`mix-${gIdx}`).parentElement;
+        const audio = document.getElementById(`mix-${gIdx}`);
+        const btn   = card.querySelector('.play');
+        const seek  = card.querySelector('.seek');
+        const time  = card.querySelector('.time');
+
+        btn.addEventListener('click', () => audio.paused ? audio.play() : audio.pause());
+        audio.addEventListener('play',  () => btn.textContent = '⏸');
+        audio.addEventListener('pause', () => btn.textContent = '▶');
+        audio.addEventListener('timeupdate', () => {
+          if (!isFinite(audio.duration)) return;
+          seek.max   = audio.duration;
+          seek.value = audio.currentTime;
+          const mins = Math.floor(audio.currentTime / 60);
+          const secs = String(Math.floor(audio.currentTime % 60)).padStart(2,'0');
+          time.textContent = `${mins}:${secs}`;
+        });
+        seek.addEventListener('input', () => { audio.currentTime = seek.value; });
+      });
+
+      renderedMixes += slice.length;
+      if (renderedMixes >= djMixes.length) document.getElementById('mixViewMore').remove();
+    }
+
+    // View‑More handler
+    document.addEventListener('DOMContentLoaded', () => {
+      loadMixes();
+      const moreBtn = document.getElementById('mixMoreBtn');
+      if (moreBtn) moreBtn.addEventListener('click', renderNextMixes);
+    });
+
     // Kick‑off after DOM ready
     document.addEventListener('DOMContentLoaded', () => {
       loadEvents();      // existing call for photography grid
-      loadMixes();       // NEW call for DJ mixes
     });
   </script>
 </body>
