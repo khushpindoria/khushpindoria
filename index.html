@@ -270,12 +270,12 @@
     </div>
   </section>
 
-  <!-- DJ Mixes Section -->
+  <!-- DJ MIXES SECTION (NEW & DYNAMIC) -->
   <section id="dj" class="py-16 px-4 fade-in">
     <div class="max-w-5xl mx-auto">
-      <h2 class="text-3xl font-bold text-center mb-8">DJ Mixes</h2>
-      <p class="text-center text-secondary mb-12">Listen to my latest sets.</p>
-      <div id="mixList" class="space-y-8"></div>
+      <h2 class="text-3xl font-bold text-center mb-8">DJ Mixes</h2>
+      <p class="text-center text-secondary mb-12">Stream my latest mixes.</p>
+      <div id="djPlaylist" class="space-y-10"></div>
     </div>
   </section>
 
@@ -600,52 +600,86 @@ If you’re interested in discussing innovative approaches to cybersecurity, tra
       }, 500);
     });
 
-    // DJ Mixes array (replace FILE_IDs with actual IDs)
-    const mixes = [
-      { title: "Sunset Mix 01", src: "https://docs.google.com/uc?export=open&id=FILE_ID_1" },
-      { title: "Deep Tech 02",  src: "https://docs.google.com/uc?export=open&id=FILE_ID_2" }
-    ];
+    const folderId = 'YOUR_KP_MIXES_FOLDER_ID';
+    const apiKey   = 'YOUR_SIMPLE_DRIVE_API_KEY';
 
-    function renderMixes() {
-      const list = document.getElementById('mixList');
-      mixes.forEach((mix, i) => {
-        const card = document.createElement('div');
-        card.className = "card p-6";
-        card.innerHTML = `
-          <h3 class="text-xl font-medium mb-4">${mix.title}</h3>
-          <audio id="audio-${i}" src="${mix.src}" preload="none"></audio>
-          <div class="flex items-center gap-4">
-            <button id="play-${i}" class="btn bg-gradient-to-r from-blue-600 to-blue-700 text-white p-2 rounded-full">▶</button>
-            <input id="seek-${i}" type="range" min="0" value="0" class="flex-1 accent-[var(--accent-color)]">
-            <span id="time-${i}" class="w-14 text-right text-sm">0:00</span>
-          </div>`;
-        list.appendChild(card);
-
-        const audio = card.querySelector(`#audio-${i}`);
-        const playBtn = card.querySelector(`#play-${i}`);
-        const seekBar = card.querySelector(`#seek-${i}`);
-        const timeEl = card.querySelector(`#time-${i}`);
-
-        playBtn.addEventListener('click', () => {
-          audio.paused ? audio.play() : audio.pause();
+    async function loadMixes () {
+      const endpoint = `https://www.googleapis.com/drive/v3/files?` +
+        new URLSearchParams({
+          q: `'${folderId}' in parents and mimeType contains 'audio/'`,
+          fields: 'files(id,name,size,modifiedTime)',
+          key: apiKey,
+          orderBy: 'modifiedTime desc'
         });
-        audio.addEventListener('play', () => playBtn.textContent = '⏸');
-        audio.addEventListener('pause', () => playBtn.textContent = '▶');
+
+      try {
+        const res   = await fetch(endpoint);
+        const json  = await res.json();
+        buildMixCards(json.files || []);
+      } catch (err) {
+        console.error('Mix fetch error', err);
+      }
+    }
+
+    function buildMixCards (files) {
+      const root = document.getElementById('djPlaylist');
+      if (!root) return;
+
+      files.forEach((file, idx) => {
+        const prettyName = file.name.replace(/\.mp3$/i,'').replace(/[-_]/g,' ');
+        const src = `https://docs.google.com/uc?export=open&id=${file.id}`;
+
+        root.insertAdjacentHTML('beforeend', `
+          <div class="card p-6 rounded-2xl shadow-xl">
+            <h3 class="text-xl font-semibold mb-4">${prettyName}</h3>
+            <audio id="mix-${idx}" src="${src}" preload="none"></audio>
+            <div class="flex items-center gap-4">
+              <button data-i="${idx}" class="mix-play btn bg-gradient-to-r from-blue-600 to-blue-700 text-white p-3 rounded-full">▶</button>
+              <input type="range" min="0" value="0" data-i="${idx}" class="mix-seek flex-1 accent-[var(--accent-color)]">
+              <span class="mix-time w-14 text-right text-sm">0:00</span>
+            </div>
+          </div>`);
+      });
+
+      wireMixControls();
+    }
+
+    function wireMixControls () {
+      const root = document.getElementById('djPlaylist');
+
+      root.addEventListener('click', e => {
+        if (!e.target.classList.contains('mix-play')) return;
+        const i     = e.target.dataset.i;
+        const audio = document.getElementById(`mix-${i}`);
+        // pause any other playing mix
+        root.querySelectorAll('audio').forEach(a => { if (a!==audio) a.pause(); });
+        audio.paused ? audio.play() : audio.pause();
+      });
+
+      root.querySelectorAll('audio').forEach((audio, i) => {
+        const card = root.children[i];
+        const btn  = card.querySelector('.mix-play');
+        const seek = card.querySelector('.mix-seek');
+        const time = card.querySelector('.mix-time');
+
         audio.addEventListener('timeupdate', () => {
-          seekBar.max = audio.duration || 0;
-          seekBar.value = audio.currentTime;
-          const m = Math.floor(audio.currentTime / 60);
-          const s = String(Math.floor(audio.currentTime % 60)).padStart(2, '0');
-          timeEl.textContent = `${m}:${s}`;
+          seek.max   = audio.duration || 0;
+          seek.value = audio.currentTime;
+          const m = Math.floor(audio.currentTime/60) || 0;
+          const s = String(Math.floor(audio.currentTime%60)).padStart(2,'0');
+          time.textContent = `${m}:${s}`;
         });
-        seekBar.addEventListener('input', () => audio.currentTime = seekBar.value);
+
+        seek.addEventListener('input', () => { audio.currentTime = seek.value; });
+        audio.addEventListener('play',  () => { btn.textContent = '⏸'; });
+        audio.addEventListener('pause', () => { btn.textContent = '▶';  });
       });
     }
 
-    // DOMContentLoaded
+    // Kick‑off after DOM ready
     document.addEventListener('DOMContentLoaded', () => {
-      loadEvents();
-      renderMixes();
+      loadEvents();      // existing call for photography grid
+      loadMixes();       // NEW call for DJ mixes
     });
   </script>
 </body>
