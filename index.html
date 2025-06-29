@@ -669,16 +669,17 @@ If you’re interested in discussing innovative approaches to cybersecurity, tra
       if (renderedMixes >= djMixes.length) document.getElementById('mixViewMore').remove();
     }
 
-    // View‑More handler
+    // Single DOMContentLoaded boot-strap
     document.addEventListener('DOMContentLoaded', () => {
+      /* 1️⃣  Photography grid */
+      loadEvents();
+
+      /* 2️⃣  DJ mixes grid */
       loadMixes();
+
+      /* 3️⃣  “View More” for mixes */
       const moreBtn = document.getElementById('mixMoreBtn');
       if (moreBtn) moreBtn.addEventListener('click', renderNextMixes);
-    });
-
-    // Kick‑off after DOM ready
-    document.addEventListener('DOMContentLoaded', () => {
-      loadEvents();      // existing call for photography grid
     });
   </script>
 </body>
