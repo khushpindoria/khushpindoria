@@ -2,8 +2,8 @@
 "use client";
 
 import React, { useEffect, useRef, useLayoutEffect } from "react";
-import { Terminal } from "xterm";
-import { FitAddon } from "xterm-addon-fit";
+import { Terminal } from "@xterm/xterm";
+import { FitAddon } from "@xterm/addon-fit";
 import { useTheme } from "next-themes";
 
 const RESUME = {
@@ -78,6 +78,7 @@ const COMMANDS: { [key: string]: (term: Terminal) => string | void } = {
 const CliResume = () => {
   const terminalRef = useRef<HTMLDivElement>(null);
   const term = useRef<Terminal | null>(null);
+  const fitAddon = useRef<FitAddon | null>(null);
   const { theme } = useTheme();
 
   const PROMPT = `\r\n\x1b[1;34m❯\x1b[0m `;
@@ -98,6 +99,7 @@ const CliResume = () => {
     xterm.loadAddon(xtermFitAddon);
     
     term.current = xterm;
+    fitAddon.current = xtermFitAddon;
     
     xterm.open(terminalRef.current);
     xtermFitAddon.fit();
@@ -221,5 +223,3 @@ const CliResume = () => {
 };
 
 export default CliResume;
-
-    
