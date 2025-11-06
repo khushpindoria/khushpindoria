@@ -14,7 +14,7 @@ export default function Logo() {
           className="h-8 w-8"
         />
       </div>
-      <span className="text-xl font-bold tracking-tighter text-primary">
+      <span className="text-xl font-bold tracking-tighter text-primary" style={{ fontFamily: 'Archivo, sans-serif' }}>
         KP
       </span>
     </Link>
