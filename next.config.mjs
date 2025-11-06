@@ -13,10 +13,29 @@ const nextConfig = {
     ],
   },
   webpack: (config, { isServer }) => {
-    config.optimization.splitChunks = {
-      ...config.optimization.splitChunks,
-      chunks: 'all',
-    };
+    if (!isServer) {
+      config.optimization.splitChunks = {
+        ...config.optimization.splitChunks,
+        chunks: 'all',
+        maxInitialRequests: Infinity,
+        minSize: 0,
+        cacheGroups: {
+          ...config.optimization.splitChunks.cacheGroups,
+          vendor: {
+            test: /[\\/]node_modules[\\/]/,
+            name(module) {
+              const packageName = module.context.match(/[\\/]node_modules[\\/](.*?)([\\/]|$)/)[1];
+              return `npm.${packageName.replace('@', '')}`;
+            },
+          },
+          xterm: {
+            test: /[\\/]node_modules[\\/](@xterm|xterm-addon-fit)[\\/]/,
+            name: 'vendor.xterm',
+            chunks: 'all',
+          },
+        },
+      };
+    }
     return config;
   },
 };
