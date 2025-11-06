@@ -17,11 +17,7 @@ const initialState: {
   errors?: {
     code?: string[]
   }
-} = {
-  summary: "",
-  error: "",
-  errors: {},
-};
+} = {};
 
 export default function CodeExplainerPage() {
   const [state, formAction] = useActionState(getCodeSummary, initialState);

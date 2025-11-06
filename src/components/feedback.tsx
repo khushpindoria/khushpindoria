@@ -1,8 +1,7 @@
+
 "use client";
 
-import { useState, useTransition, useActionState } from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
+import { useState, useTransition, useActionState, useEffect } from "react";
 import { z } from "zod";
 
 import { Button } from "@/components/ui/button";
@@ -27,9 +26,12 @@ import {
   FormLabel,
   FormMessage,
 } from "./ui/form";
-import { MessageCircle } from "lucide-react";
+import { MessageCircle, Loader2 } from "lucide-react";
 import { submitFeedbackForm } from "@/app/actions";
 import { useSound } from "@/hooks/use-sound";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+
 
 const feedbackSchema = z.object({
   name: z.string().min(1, "Name is required."),
@@ -38,16 +40,19 @@ const feedbackSchema = z.object({
 
 type FeedbackFormValues = z.infer<typeof feedbackSchema>;
 
-const initialState = {
-  message: "",
-  error: "",
-  errors: {},
-};
+const initialState: {
+    message?: string;
+    error?: string;
+    errors?: {
+        name?: string[];
+        feedback?: string[];
+    }
+} = {};
 
 export default function Feedback() {
   const [open, setOpen] = useState(false);
-  const [isPending, startTransition] = useTransition();
   const [state, formAction] = useActionState(submitFeedbackForm, initialState);
+  const [isPending, startTransition] = useTransition();
   const { toast } = useToast();
   const { playSound } = useSound();
 
@@ -59,25 +64,30 @@ export default function Feedback() {
     },
   });
 
-  const onSubmit = (data: FeedbackFormValues) => {
+  useEffect(() => {
+    if (state.message) {
+      toast({ title: "Success", description: state.message });
+      form.reset();
+      setOpen(false);
+    }
+    if (state.error) {
+      toast({
+        title: "Error",
+        description: state.error,
+        variant: "destructive",
+      });
+    }
+  }, [state, toast, form, setOpen]);
+  
+  const handleSubmit = (data: FeedbackFormValues) => {
+    playSound();
     const formData = new FormData();
     formData.append("name", data.name);
     formData.append("feedback", data.feedback);
 
-    startTransition(async () => {
-      const result = await submitFeedbackForm(initialState, formData);
-      if (result.message) {
-        toast({ title: "Success", description: result.message });
-        form.reset();
-        setOpen(false);
-      } else if (result.error) {
-        toast({
-          title: "Error",
-          description: result.error,
-          variant: "destructive",
-        });
-      }
-    });
+    startTransition(() => {
+        formAction(formData);
+    })
   };
 
   return (
@@ -101,7 +111,7 @@ export default function Feedback() {
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
             <FormField
               control={form.control}
               name="name"
@@ -134,8 +144,12 @@ export default function Feedback() {
                   Cancel
                 </Button>
               </DialogClose>
-              <Button type="submit" disabled={isPending} onClick={playSound}>
-                {isPending ? "Submitting..." : "Submit"}
+              <Button type="submit" disabled={isPending}>
+                {isPending ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Submitting...
+                  </>
+                ) : "Submit"}
               </Button>
             </DialogFooter>
           </form>
@@ -144,3 +158,4 @@ export default function Feedback() {
     </Dialog>
   );
 }
+

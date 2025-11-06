@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useActionState, useTransition, useEffect } from "react";
@@ -12,7 +13,7 @@ import { Input } from "../ui/input";
 import { Textarea } from "../ui/textarea";
 import { Button } from "../ui/button";
 import FadeIn from "../fade-in";
-import { Send } from "lucide-react";
+import { Send, Loader2 } from "lucide-react";
 import { useSound } from "@/hooks/use-sound";
 
 const contactSchema = z.object({
@@ -23,11 +24,15 @@ const contactSchema = z.object({
 
 type ContactFormValues = z.infer<typeof contactSchema>;
 
-const initialState = {
-  message: "",
-  error: "",
-  errors: {},
-};
+const initialState: {
+  message?: string;
+  error?: string;
+  errors?: {
+    name?: string[];
+    email?: string[];
+    message?: string[];
+  };
+} = {};
 
 export default function Contact() {
   const [state, formAction] = useActionState(submitContactForm, initialState);
@@ -118,8 +123,15 @@ export default function Contact() {
                   )}
                 />
                 <Button type="submit" disabled={isPending} className="w-full sm:w-auto">
-                  {isPending ? "Sending..." : "Send Message"}
-                  <Send className="ml-2 h-4 w-4" />
+                  {isPending ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Sending...
+                    </>
+                  ) : (
+                    <>
+                      Send Message <Send className="ml-2 h-4 w-4" />
+                    </>
+                  )}
                 </Button>
               </form>
             </Form>
