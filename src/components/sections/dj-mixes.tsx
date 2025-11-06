@@ -42,7 +42,7 @@ export default function DjMixes() {
   }, [playSound]);
 
   const hasMore = renderedCount < mixes.length;
-  const djPlaceholderImage = "https://picsum.photos/seed/dj/280/180";
+  const djPlaceholderImage = "/img/dj-placeholder.png";
 
   return (
     <section id="dj" className="py-16 sm:py-24 px-4 container mx-auto">
