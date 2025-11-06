@@ -1,7 +1,5 @@
-import type {NextConfig} from 'next';
-
-const nextConfig: NextConfig = {
-  /* config options here */
+/** @type {import('next').NextConfig} */
+const nextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
@@ -33,8 +31,12 @@ const nextConfig: NextConfig = {
         hostname: 'lh3.googleusercontent.com',
         port: '',
         pathname: '/**',
-      }
+      },
     ],
+  },
+  experimental: {
+    // This is to force smaller file chunks to avoid Cloudflare's 25MB limit.
+    largePageDataBytes: 128 * 1000, 
   },
 };
 
