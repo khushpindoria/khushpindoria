@@ -11,7 +11,13 @@ import FadeIn from "@/components/fade-in";
 import { useSound } from "@/hooks/use-sound";
 import Link from "next/link";
 
-const initialState = {
+const initialState: {
+  summary?: string;
+  error?: string;
+  errors?: {
+    code?: string[]
+  }
+} = {
   summary: "",
   error: "",
   errors: {},
