@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { Inter } from 'next/font/google';
+import { Inter, Iceland } from 'next/font/google'; // Added Iceland
 import './globals.css';
 import { cn } from '@/lib/utils';
 import { ThemeProvider } from '@/components/theme-provider';
@@ -12,6 +12,13 @@ import Feedback from '@/components/feedback';
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
 
+// Add Iceland font for logo
+const iceland = Iceland({ 
+  weight: ['400'],
+  subsets: ['latin'],
+  variable: '--font-logo'
+});
+
 export const metadata: Metadata = {
   title: 'Khush Pindoria | Photographer & Cybersecurity Innovator',
   description: 'The personal portfolio of Khush Pindoria, showcasing photography, DJ mixes, and tech projects.',
@@ -23,7 +30,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning className={iceland.variable}>
       <body className={cn('font-headline antialiased site-background', inter.variable)}>
         <SoundProvider>
           <ThemeProvider
