@@ -1,8 +1,9 @@
+
 import FadeIn from "../fade-in";
 import { Button } from "../ui/button";
 import { DiscordIcon, FacebookIcon, GithubIcon, InstagramIcon, LinkedinIcon } from "../icons";
 import BinaryRain from "../binary-rain";
-import { cn } from "@/lib/utils";
+import WordLoader from "../word-loader";
 
 const socialLinks = [
     { href: "https://www.linkedin.com/in/khush-pindoria-176884189", icon: LinkedinIcon, label: "LinkedIn" },
@@ -20,12 +21,13 @@ export default function Hero() {
         <BinaryRain />
       </div>
       <FadeIn className="relative z-10 flex flex-col items-center">
-        <h1 className="text-5xl md:text-7xl font-extrabold tracking-tighter mb-4 text-foreground">
-          Khush Pindoria
+        <h1 className="text-4xl md:text-6xl font-prompt tracking-tighter mb-4 text-foreground">
+          KHUSH PINDORIA
         </h1>
-        <p className="text-lg md:text-xl text-slate-300 max-w-2xl mx-auto mb-8 font-semibold">
-          Cybersecurity Innovator | Photographer | Tech Enthusiast
-        </p>
+        <WordLoader 
+          words={["AI", "CYBERSECURITY", "PHOTOGRAPHER"]} 
+          className="text-lg md:text-xl text-slate-300 max-w-2xl mx-auto mb-8 font-semibold"
+        />
 
         <div className="flex justify-center items-center space-x-6 mb-12">
             {socialLinks.map(({ href, icon: Icon, label }) => (

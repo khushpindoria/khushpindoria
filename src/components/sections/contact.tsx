@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useActionState, useTransition, useEffect } from "react";
+import { useTransition } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -24,18 +24,7 @@ const contactSchema = z.object({
 
 type ContactFormValues = z.infer<typeof contactSchema>;
 
-const initialState: {
-  message?: string;
-  error?: string;
-  errors?: {
-    name?: string[];
-    email?: string[];
-    message?: string[];
-  };
-} = {};
-
 export default function Contact() {
-  const [state, formAction] = useActionState(submitContactForm, initialState);
   const [isPending, startTransition] = useTransition();
   const { toast } = useToast();
   const { playSound } = useSound();
@@ -45,25 +34,16 @@ export default function Contact() {
     defaultValues: { name: "", email: "", message: "" },
   });
 
-  useEffect(() => {
-    if (state.message) {
-      toast({ title: "Success", description: state.message });
-      form.reset();
-    }
-    if (state.error) {
-      toast({ title: "Error", description: state.error, variant: "destructive" });
-    }
-  }, [state, toast, form]);
-
   const onSubmit = (data: ContactFormValues) => {
     playSound();
-    const formData = new FormData();
-    formData.append("name", data.name);
-    formData.append("email", data.email);
-    formData.append("message", data.message);
-
-    startTransition(() => {
-      formAction(formData);
+    startTransition(async () => {
+      const result = await submitContactForm(data);
+      if (result?.message) {
+        toast({ title: "Success", description: result.message });
+        form.reset();
+      } else if (result?.error) {
+        toast({ title: "Error", description: result.error, variant: "destructive" });
+      }
     });
   };
 

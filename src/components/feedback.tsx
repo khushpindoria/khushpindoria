@@ -1,9 +1,8 @@
 
 "use client";
 
-import { useState, useTransition, useActionState, useEffect } from "react";
+import { useState, useTransition } from "react";
 import { z } from "zod";
-
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -32,7 +31,6 @@ import { useSound } from "@/hooks/use-sound";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
-
 const feedbackSchema = z.object({
   name: z.string().min(1, "Name is required."),
   feedback: z.string().min(10, "Feedback must be at least 10 characters."),
@@ -40,18 +38,8 @@ const feedbackSchema = z.object({
 
 type FeedbackFormValues = z.infer<typeof feedbackSchema>;
 
-const initialState: {
-    message?: string;
-    error?: string;
-    errors?: {
-        name?: string[];
-        feedback?: string[];
-    }
-} = {};
-
 export default function Feedback() {
   const [open, setOpen] = useState(false);
-  const [state, formAction] = useActionState(submitFeedbackForm, initialState);
   const [isPending, startTransition] = useTransition();
   const { toast } = useToast();
   const { playSound } = useSound();
@@ -64,30 +52,22 @@ export default function Feedback() {
     },
   });
 
-  useEffect(() => {
-    if (state.message) {
-      toast({ title: "Success", description: state.message });
-      form.reset();
-      setOpen(false);
-    }
-    if (state.error) {
-      toast({
-        title: "Error",
-        description: state.error,
-        variant: "destructive",
-      });
-    }
-  }, [state, toast, form, setOpen]);
-  
   const handleSubmit = (data: FeedbackFormValues) => {
     playSound();
-    const formData = new FormData();
-    formData.append("name", data.name);
-    formData.append("feedback", data.feedback);
-
-    startTransition(() => {
-        formAction(formData);
-    })
+    startTransition(async () => {
+        const result = await submitFeedbackForm(data);
+        if (result?.message) {
+            toast({ title: "Success", description: result.message });
+            form.reset();
+            setOpen(false);
+        } else if (result?.error) {
+            toast({
+                title: "Error",
+                description: result.error,
+                variant: "destructive",
+            });
+        }
+    });
   };
 
   return (
@@ -158,4 +138,3 @@ export default function Feedback() {
     </Dialog>
   );
 }
-

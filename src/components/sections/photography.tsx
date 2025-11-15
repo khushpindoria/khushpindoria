@@ -1,27 +1,24 @@
-"use client";
+'use client';
 
-import { useEffect, useState, useCallback } from "react";
-import Image from "next/image";
-import { PhotographyEvent } from "@/lib/types";
-import { Button } from "../ui/button";
-import { Card, CardContent } from "../ui/card";
-import { Skeleton } from "../ui/skeleton";
+import { useEffect, useState, useCallback } from 'react';
+import Image from 'next/image';
+import { PhotographyEvent } from '@/lib/types';
+import { Card, CardContent } from '../ui/card';
+import { Skeleton } from '../ui/skeleton';
 import {
   Dialog,
   DialogContent,
   DialogTitle,
-} from "@/components/ui/dialog";
-import FadeIn from "../fade-in";
-import { useSound } from "@/hooks/use-sound";
-import { PlaceHolderImages } from "@/lib/placeholder-images";
-import { cn } from "@/lib/utils";
+} from '@/components/ui/dialog';
+import FadeIn from '../fade-in';
+import { useSound } from '@/hooks/use-sound';
+import { PlaceHolderImages } from '@/lib/placeholder-images';
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '../ui/carousel';
 
-const BATCH_SIZE = 6;
 const eventsEndpoint = 'https://gd.khush23.workers.dev';
 
 export default function Photography() {
   const [events, setEvents] = useState<PhotographyEvent[]>([]);
-  const [renderedCount, setRenderedCount] = useState(BATCH_SIZE);
   const [loading, setLoading] = useState(true);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const { playSound } = useSound();
@@ -44,17 +41,10 @@ export default function Photography() {
     fetchEvents();
   }, []);
 
-  const loadMore = useCallback(() => {
-    playSound();
-    setRenderedCount(prev => prev + BATCH_SIZE);
-  }, [playSound]);
-
   const handleImageClick = (imageUrl: string) => {
     playSound();
     setSelectedImage(imageUrl);
   };
-
-  const hasMore = renderedCount < events.length;
 
   return (
     <section id="photography" className="py-16 sm:py-24 px-4 container mx-auto">
@@ -65,9 +55,9 @@ export default function Photography() {
         </p>
 
         {loading ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[...Array(BATCH_SIZE)].map((_, i) => (
-              <Card key={i} className="overflow-hidden bg-card/50 border-secondary">
+          <div className="flex justify-center gap-6">
+            {[...Array(3)].map((_, i) => (
+              <Card key={i} className="overflow-hidden bg-card/50 border-secondary w-1/3">
                 <Skeleton className="h-80 w-full" />
                 <CardContent className="p-4">
                   <Skeleton className="h-6 w-3/4 mx-auto" />
@@ -76,33 +66,42 @@ export default function Photography() {
             ))}
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-            {events.slice(0, renderedCount).map((event, index) => (
-              <Card 
-                key={index} 
-                className="overflow-hidden cursor-pointer group transform transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl bg-card/50 backdrop-blur-sm rounded-lg border-secondary aspect-square relative"
-                onClick={() => handleImageClick(event.coverPhotoUrl)}
-              >
-                <Image
-                  src={event.coverPhotoUrl || photographyPlaceholder?.imageUrl || ''}
-                  alt={event.title}
-                  fill
-                  className="object-cover group-hover:scale-105 transition-transform duration-500"
-                  loading="lazy"
-                  data-ai-hint={photographyPlaceholder?.imageHint || 'photography event'}
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent group-hover:from-black/80 transition-all duration-300"></div>
-                <CardContent className="absolute bottom-0 left-0 right-0 p-4">
-                  <h3 className="text-lg font-semibold text-white truncate drop-shadow-md">{event.title}</h3>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        )}
-        
-        {hasMore && !loading && (
-          <div className="text-center mt-12">
-            <Button onClick={loadMore} size="lg">View More</Button>
+          <div className="px-32">
+            <Carousel
+              opts={{
+                align: 'start',
+                loop: true,
+              }}
+              className="w-full"
+            >
+              <CarouselContent>
+                {events.map((event, index) => (
+                  <CarouselItem key={index} className="md:basis-1/2 lg:basis-1/3">
+                    <div className="p-1">
+                      <Card 
+                        className="overflow-hidden cursor-pointer group transform transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl bg-card/50 backdrop-blur-sm rounded-lg border-secondary aspect-square relative"
+                        onClick={() => handleImageClick(event.coverPhotoUrl)}
+                      >
+                        <Image
+                          src={event.coverPhotoUrl || photographyPlaceholder?.imageUrl || ''}
+                          alt={event.title}
+                          fill
+                          className="object-cover group-hover:scale-105 transition-transform duration-500"
+                          loading="lazy"
+                          data-ai-hint={photographyPlaceholder?.imageHint || 'photography event'}
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent group-hover:from-black/80 transition-all duration-300"></div>
+                        <CardContent className="absolute bottom-0 left-0 right-0 p-4">
+                          <h3 className="text-lg font-semibold text-white truncate drop-shadow-md">{event.title}</h3>
+                        </CardContent>
+                      </Card>
+                    </div>
+                  </CarouselItem>
+                ))}
+              </CarouselContent>
+              <CarouselPrevious className="h-12 w-12" />
+              <CarouselNext className="h-12 w-12" />
+            </Carousel>
           </div>
         )}
       </FadeIn>

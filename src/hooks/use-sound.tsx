@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useRef, ReactNode, useCallback } from 'react';
+import React, { createContext, useContext, ReactNode, useCallback } from 'react';
 
 interface SoundContextType {
   playSound: () => void;
@@ -9,21 +9,8 @@ interface SoundContextType {
 const SoundContext = createContext<SoundContextType | undefined>(undefined);
 
 export const SoundProvider = ({ children }: { children: ReactNode }) => {
-  const audioRef = useRef<HTMLAudioElement | null>(null);
-
-  // This effect runs only on the client
-  if (typeof window !== 'undefined' && !audioRef.current) {
-    const audio = new Audio("https://www.myinstants.com/media/sounds/pisseim-mund-online-audio-converter.mp3");
-    audio.preload = 'auto';
-    audioRef.current = audio;
-  }
-  
-  const playSound = useCallback(() => {
-    if (audioRef.current) {
-      audioRef.current.currentTime = 0;
-      audioRef.current.play().catch(error => console.error("Audio play failed:", error));
-    }
-  }, []);
+  // Sound is removed, playSound now does nothing.
+  const playSound = useCallback(() => {}, []);
 
   return (
     <SoundContext.Provider value={{ playSound }}>

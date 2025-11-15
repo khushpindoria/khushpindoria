@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { Inter, Iceland } from 'next/font/google'; // Added Iceland
+import { Inter, Iceland, Share_Tech_Mono, VT323, Prompt, Inconsolata } from 'next/font/google';
 import './globals.css';
 import { cn } from '@/lib/utils';
 import { ThemeProvider } from '@/components/theme-provider';
@@ -12,11 +12,33 @@ import Feedback from '@/components/feedback';
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
 
-// Add Iceland font for logo
 const iceland = Iceland({ 
   weight: ['400'],
   subsets: ['latin'],
   variable: '--font-logo'
+});
+
+const shareTechMono = Share_Tech_Mono({
+  weight: ['400'],
+  subsets: ['latin'],
+  variable: '--font-tech',
+});
+
+const vt323 = VT323({
+  weight: ['400'],
+  subsets: ['latin'],
+  variable: '--font-vt323',
+});
+
+const prompt = Prompt({
+  weight: ['300'],
+  subsets: ['latin'],
+  variable: '--font-prompt',
+});
+
+const inconsolata = Inconsolata({
+  subsets: ['latin'],
+  variable: '--font-inconsolata',
 });
 
 export const metadata: Metadata = {
@@ -30,8 +52,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning className={iceland.variable}>
-      <body className={cn('font-headline antialiased site-background', inter.variable)}>
+    <html lang="en" suppressHydrationWarning className={`${iceland.variable} ${shareTechMono.variable} ${vt323.variable} ${prompt.variable} ${inconsolata.variable}`}>
+      <body className={cn('font-body antialiased site-background', inter.variable)}>
         <SoundProvider>
           <ThemeProvider
             attribute="class"

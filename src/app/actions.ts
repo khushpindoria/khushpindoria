@@ -1,3 +1,4 @@
+
 "use server";
 
 import { z } from "zod";
@@ -11,12 +12,8 @@ const contactSchema = z.object({
   message: z.string().min(1, "Message is required."),
 });
 
-export async function submitContactForm(prevState: any, formData: FormData) {
-  const validatedFields = contactSchema.safeParse({
-    name: formData.get("name"),
-    email: formData.get("email"),
-    message: formData.get("message"),
-  });
+export async function submitContactForm(data: { name: string; email: string; message: string; }) {
+  const validatedFields = contactSchema.safeParse(data);
 
   if (!validatedFields.success) {
     return {
@@ -33,12 +30,15 @@ export async function submitContactForm(prevState: any, formData: FormData) {
     });
 
     if (!res.ok) {
-      throw new Error(await res.text());
+      const errorText = await res.text();
+      console.error("Worker Error:", errorText);
+      throw new Error(errorText);
     }
 
-    return { message: "Message sent successfully!" };
+    return { message: "Message sent successfully!", errors: null };
   } catch (err: any) {
-    return { error: "Failed to send message: " + err.message };
+    console.error("Fetch Error:", err);
+    return { message: null, error: "Failed to send message: " + err.message };
   }
 }
 
@@ -47,11 +47,8 @@ const feedbackSchema = z.object({
   feedback: z.string().min(1, "Feedback is required."),
 });
 
-export async function submitFeedbackForm(prevState: any, formData: FormData) {
-  const validatedFields = feedbackSchema.safeParse({
-    name: formData.get("name"),
-    feedback: formData.get("feedback"),
-  });
+export async function submitFeedbackForm(data: { name: string; feedback: string; }) {
+  const validatedFields = feedbackSchema.safeParse(data);
 
   if (!validatedFields.success) {
     return {
@@ -70,17 +67,20 @@ export async function submitFeedbackForm(prevState: any, formData: FormData) {
     const res = await fetch(workerEndpoint, {
       method: "POST",
       mode: "cors",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application-json" },
       body: JSON.stringify(payload),
     });
 
     if (!res.ok) {
-      throw new Error(await res.text());
+      const errorText = await res.text();
+      console.error("Worker Error:", errorText);
+      throw new Error(errorText);
     }
 
-    return { message: "Feedback submitted successfully!" };
+    return { message: "Feedback submitted successfully!", errors: null };
   } catch (err: any) {
-    return { error: "Failed to submit feedback: " + err.message };
+    console.error("Fetch Error:", err);
+    return { message: null, error: "Failed to submit feedback: " + err.message };
   }
 }
 
