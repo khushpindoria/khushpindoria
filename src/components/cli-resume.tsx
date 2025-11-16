@@ -7,18 +7,22 @@ import { FitAddon } from "@xterm/addon-fit";
 import { useTheme } from "next-themes";
 
 const RESUME = {
-  summary: `Experienced Transformation Team Lead specialising in cybersecurity, AI & automation. Proven record of cutting false-positive alerts by 60% and slashing incident response times by 45% at Slipstream Cyber. Passionate about secure-by-design innovation, mentoring, and turning data into business results.`,
+  summary: `AI engineer with a cybersecurity background, helping organisations harness trustworthy AI to strengthen security and operational resilience. Previously, as a Transformation Team Lead at Slipstream Cyber, I had a proven record of cutting false-positive alerts by 60% and slashing incident response times by 45%. Passionate about secure-by-design innovation, mentoring, and turning data into business results.`,
   skills: `\x1b[1mTechnical:\x1b[0m
-  • Python, JavaScript/TypeScript, PowerShell, SQL
-  • AI/ML (LangChain, AWS Bedrock, SageMaker)
+  • Python, Data Analytics, JavaScript/TypeScript, PowerShell, SQL
+  • AI/ML, Generative AI (LangChain, AWS Bedrock, SageMaker)
+  • Security Engineering, Threat Detection, SIEM/SOAR Optimisation
   • Security Ops Tooling: Microsoft Defender / Sentinel, CrowdStrike, Splunk, Chronicle SOAR
-  • Cloud: Azure, AWS, GCP
+  • Cloud Platforms: Azure, AWS, GCP
   • Dev & Infra: Docker, CI/CD, Terraform, Fortinet, Cisco
 \x1b[1mSoft:\x1b[0m
   • Leadership & Mentoring
   • Stakeholder Communication
   • Critical Thinking & Problem-solving`,
-  experience: `\x1b[1mTransformation Team Lead | Slipstream Cyber | 2024-present\x1b[0m
+  experience: `\x1b[1mAI Engineer | PolusAI | 2024-present\x1b[0m
+  • Design and build bespoke AI solutions that transform data into actionable insights and automation.
+  • Architect models and platforms that integrate with existing systems and deliver measurable results.
+\n\x1b[1mTransformation Team Lead | Slipstream Cyber | 2024\x1b[0m
   • Deployed AI-driven SOAR playbooks → 65% faster investigations
   • Managed 50-staff office relocation with zero downtime
   • Delivered exec dashboards (Power BI) for real-time cyber metrics
@@ -39,8 +43,9 @@ const RESUME = {
 • CrowdStrike Certified Falcon Admin
 • Microsoft Security Ops Analyst (SC-200)
 • Chronicle SOAR Analyst & Developer`,
-  projects: `• Slipstream AI Transformation – company-wide automation, Innovation Excellence Award 2025
-• KPFotografy – Minimalist photography portfolio (this site)`,
+  projects: `• PolusAI Solutions – Designing and building bespoke AI solutions for clients.
+• Slipstream AI Transformation – Company-wide automation, Innovation Excellence Award 2025.
+• KPFotografy & Web Design – Running a photography business and designing websites (like this one).`,
   contact: `Email   : support@khushpindoria.com
 Phone   : +61 4xx xxx xxx
 LinkedIn: linkedin.com/in/khush-pindoria-176884189`,

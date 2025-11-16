@@ -66,7 +66,7 @@ export default function Photography() {
             ))}
           </div>
         ) : (
-          <div className="px-32">
+          <div className="px-20">
             <Carousel
               opts={{
                 align: 'start',

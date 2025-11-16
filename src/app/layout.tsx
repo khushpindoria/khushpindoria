@@ -6,7 +6,7 @@ import { ThemeProvider } from '@/components/theme-provider';
 import Header from '@/components/header';
 import Footer from '@/components/footer';
 import { Toaster } from '@/components/ui/toaster';
-import CursorTrail from '@/components/cursor-trail';
+import IpadCursor from '@/components/ipad-cursor';
 import { SoundProvider } from '@/hooks/use-sound';
 import Feedback from '@/components/feedback';
 
@@ -62,7 +62,7 @@ export default function RootLayout({
             disableTransitionOnChange
           >
             <div className="binary-bg" />
-            <CursorTrail />
+            <IpadCursor />
             <Header />
             <main>{children}</main>
             <Footer />

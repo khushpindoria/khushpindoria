@@ -49,7 +49,7 @@ export default function DjMixes() {
             ))}
           </div>
         ) : (
-          <div className="px-32">
+          <div className="px-20">
             <Carousel
               opts={{
                 align: 'start',
