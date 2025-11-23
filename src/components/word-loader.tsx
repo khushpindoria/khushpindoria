@@ -75,7 +75,7 @@ const WordLoader: React.FC<WordLoaderProps> = ({
       ref={containerRef}
       className={cn("w-full", className)}
     >
-      <div className="relative h-12 flex items-center justify-center font-code text-lg md:text-xl text-slate-300 font-semibold tracking-wider">
+      <div className="relative h-12 flex items-center justify-center font-code text-lg md:text-xl text-muted-foreground font-semibold tracking-wider">
         <span ref={textRef}></span>
         <span ref={cursorRef} className="text-primary ml-[-0.2ch]">|</span>
       </div>

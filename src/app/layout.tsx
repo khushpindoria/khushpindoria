@@ -58,7 +58,6 @@ export default function RootLayout({
           <ThemeProvider
             attribute="class"
             defaultTheme="dark"
-            enableSystem
             disableTransitionOnChange
           >
             <div className="binary-bg" />

@@ -1,14 +1,19 @@
+
 "use client";
 
 import React, { useEffect, useRef } from 'react';
 import './ipad-cursor.css';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 const IpadCursor = () => {
   const cursorRef = useRef<HTMLDivElement>(null);
   const isCursorLocked = useRef(false);
   const defaultCursorSize = useRef('1em');
+  const isMobile = useIsMobile();
 
   useEffect(() => {
+    if (isMobile) return;
+
     const cursor = cursorRef.current;
     if (!cursor) return;
 
@@ -168,7 +173,11 @@ const IpadCursor = () => {
       cleanups.forEach(cleanup => cleanup());
       observer.disconnect();
     };
-  }, []);
+  }, [isMobile]);
+
+  if (isMobile) {
+    return null;
+  }
 
   return (
     <div ref={cursorRef} id="cursor" className="cursor">

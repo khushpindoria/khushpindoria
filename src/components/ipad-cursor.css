@@ -1,10 +1,16 @@
-body {
-  cursor: none;
-  user-select: none;
+
+@media (hover: hover) and (pointer: fine) {
+  body {
+    cursor: none;
+    user-select: none;
+  }
+
+  a, button {
+    cursor: none;
+  }
 }
 
 a, button {
-  cursor: none;
   transform: translate(var(--translateX), var(--translateY)) scale(var(--scale));
   transition-duration: 0.1s;
   transition-timing-function: ease-out;
@@ -51,7 +57,7 @@ a:active, button:active {
 }
 
 .cursor__content {
-  background-color: #ffffff;
+  background-color: var(--cursor-bg);
   border-radius: 0.6em;
   bottom: 0;
   left: 0;

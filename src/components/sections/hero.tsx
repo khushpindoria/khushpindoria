@@ -26,7 +26,7 @@ export default function Hero() {
         </h1>
         <WordLoader 
           words={["AI", "CYBERSECURITY", "PHOTOGRAPHER"]} 
-          className="text-lg md:text-xl text-slate-300 max-w-2xl mx-auto mb-8 font-semibold"
+          className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-8 font-semibold"
         />
 
         <div className="flex justify-center items-center space-x-6 mb-12">
